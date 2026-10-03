@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.DS_Store
+
+.vercel/
+.vercel
+
+# Local credentials and packaged/build artifacts
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.zip
+design/
