@@ -977,6 +977,7 @@
   }
   .board-mobile-cards > button > span:nth-child(2) {
     flex: 1;
+    min-width: 0;
   }
   .board-mobile-cards b {
     font-size: 11px;
@@ -989,6 +990,8 @@
     margin-top: 4px;
   }
   .board-mobile-cards > button > span:last-child {
+    flex: 0 0 60px;
+    white-space: nowrap;
     text-align: right;
     font-size: 13px;
   }
