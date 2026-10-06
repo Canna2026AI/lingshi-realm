@@ -237,7 +237,7 @@ export default function Planet({
       {fallback && <div className="planet-fallback" aria-hidden="true" />}
       <button
         className="planet-hit"
-        aria-label="触碰灵星进入山门"
+        aria-label="触碰灵星开启仙途"
         onPointerMove={(event) => {
           mouse.current = {
             x: (event.clientX / window.innerWidth - 0.5) * 2,

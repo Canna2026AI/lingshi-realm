@@ -14,7 +14,7 @@ export default function Gallery({ config }) {
       ...t,
       description:
         i === 0
-          ? `每个修炼单位，每 ${config.intervalMinutes} 分钟快照获得一颗筑基丹。`
+          ? `每个修炼单位，在宗门执行一次快照后获得一颗筑基丹。`
           : `消耗 10 个${TIERS[i - 1].name}，合成 1 个${t.name}。余下材料保留。`,
       function: `分配权重 ${t.weight}${i > 0 ? " · 比十个低阶材料高 20%" : ""}。分配金额取决于实际池收入及全网权重。`,
     })),

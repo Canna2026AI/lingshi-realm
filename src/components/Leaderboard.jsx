@@ -1,7 +1,13 @@
 import React from "react";
 import { useState, useRef, useEffect } from "react";
 import { Trophy, Search, Radio, Zap, ChevronDown } from "lucide-react";
-import { sortedHolders, shortAddress, number, percentage, TIERS } from "../engine";
+import {
+  sortedHolders,
+  shortAddress,
+  number,
+  percentage,
+  TIERS,
+} from "../engine";
 import { CopyAddress, Pill } from "./UI";
 export function Leaderboard({ state, notice }) {
   const [query, setQuery] = useState("");
@@ -156,7 +162,7 @@ function Event({ event }) {
       <div>
         <div className="event-meta">
           <span>
-            {(event.type === "core" || event.type === "upgrade")
+            {event.type === "core" || event.type === "upgrade"
               ? "境界突破"
               : event.type === "summary"
                 ? `第 ${event.round} 轮快照`
@@ -169,12 +175,18 @@ function Event({ event }) {
             <>
               本轮快照完成，<b>{event.participants}</b> 个地址获得筑基丹
             </>
-          ) : (event.type === "core" || event.type === "upgrade") ? (
+          ) : event.type === "core" || event.type === "upgrade" ? (
             <>
               {shortAddress(event.address)}
               <br />
-              <b>{event.type === "core" ? "十丹结金，突破成功" : `${TIERS.find(t => t.field === event.tier)?.name || "仙阶"}进阶，突破成功`}</b>
-              {event.amount > 1 ? ` · ${event.amount} 个${TIERS.find(t => t.field === event.tier)?.name || "金丹"}` : ""}
+              <b>
+                {event.type === "core"
+                  ? "十丹结金，突破成功"
+                  : `${TIERS.find((t) => t.field === event.tier)?.name || "仙阶"}进阶，突破成功`}
+              </b>
+              {event.amount > 1
+                ? ` · ${event.amount} 个${TIERS.find((t) => t.field === event.tier)?.name || "金丹"}`
+                : ""}
             </>
           ) : (
             <>
@@ -186,7 +198,7 @@ function Event({ event }) {
     </article>
   );
 }
-export function SnapshotFeed({ state, snapshot, busy }) {
+export function SnapshotFeed({ state }) {
   const ref = useRef(),
     paused = useRef(false);
   useEffect(() => {
@@ -220,7 +232,7 @@ export function SnapshotFeed({ state, snapshot, busy }) {
           <Radio size={21} />
           灵脉快照动态
         </h2>
-        <span className="live-dot" title="快照计时中" />
+        <span className="live-dot" title="修炼动态" />
       </div>
       <div
         className="feed-scroll"
@@ -264,14 +276,6 @@ export function SnapshotFeed({ state, snapshot, busy }) {
         )}
       </div>
       <div className="feed-foot">
-        <button
-          className="button outline"
-          disabled={busy}
-          onClick={() => snapshot(true)}
-        >
-          <Zap size={16} />
-          {busy ? "凝聚灵气中…" : "立即快照"}
-        </button>
         <span>
           {state.round
             ? `已完成 ${state.round} 轮快照`

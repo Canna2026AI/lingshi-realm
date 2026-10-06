@@ -1,6 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { STORAGE_KEY, freshState, parseState, applySnapshot } from "./engine";
-import { holderProvider } from "./holderProvider";
+import {
+  getHolderProvider,
+  upsertWallet,
+  refreshHolderData,
+  validateAddress,
+} from "./holderProvider";
 const initial = () => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -9,9 +14,10 @@ const initial = () => {
     return freshState();
   }
 };
-export function useRealm(onNotice) {
+export function useRealm(onNotice, { allowSnapshots = false } = {}) {
   const [state, setState] = useState(initial);
   const [busy, setBusy] = useState(false);
+  const snapshotLock = useRef(false);
   const [now, setNow] = useState(Date.now());
   const transact = async (action) => {
     const commit = async () => {
@@ -67,47 +73,49 @@ export function useRealm(onNotice) {
       window.removeEventListener("storage", sync);
     };
   }, []);
-  const snapshot = async (manual = true) => {
+  const snapshot = async () => {
+    if (!allowSnapshots || snapshotLock.current) return;
+    snapshotLock.current = true;
     setBusy(true);
     try {
       await transact(async (current) => {
-        if (!manual && Date.now() < current.nextAt) return current;
-        const data = await holderProvider.load({
+        const data = await getHolderProvider(current.config).load({
           ca: current.config.ca,
           chainId: 56,
           excludedAddresses: current.config.excludedAddresses,
           state: current,
         });
-        const balances = new Map(
-          data.holders.map((h) => [h.address.toLowerCase(), h.balance]),
+        const refreshed = refreshHolderData(current, data);
+        const next = applySnapshot(
+          refreshed,
+          `${current.epoch}:manual:${current.round + 1}`,
+          Date.now(),
         );
-        const refreshed = {
-          ...current,
-          config: { ...current.config, totalSupply: data.totalSupply },
-          holders: current.holders.map((h) => ({
-            ...h,
-            balance: balances.get(h.address.toLowerCase()) ?? h.balance,
-          })),
-        };
-        const id = manual
-          ? `${current.epoch}:manual:${current.round + 1}`
-          : `${current.epoch}:scheduled:${current.nextAt}`;
-        const next = applySnapshot(refreshed, id, Date.now());
-        if (next !== refreshed)
-          onNotice(
-            `第 ${next.round} 轮快照完成 · ${next.lastResult.participants} 个地址获得筑基丹`,
-          );
+        onNotice(
+          `第 ${next.round} 轮快照完成 · ${next.lastResult.participants} 个地址获得筑基丹`,
+        );
         return next;
       });
     } catch (e) {
       onNotice(e.message);
     } finally {
+      snapshotLock.current = false;
       setBusy(false);
     }
   };
-  useEffect(() => {
-    if (now >= state.nextAt && !busy) snapshot(false);
-  }, [now, state.nextAt, busy]);
+  const queryWallet = async (address) => {
+    const clean = address.trim();
+    validateAddress(clean);
+    return transact(async (current) => {
+      const data = await getHolderProvider(current.config).lookup({
+        address: clean,
+        ca: current.config.ca,
+        chainId: 56,
+        state: current,
+      });
+      return upsertWallet(current, data);
+    });
+  };
   const update = async (action) => {
     try {
       return await transact(action);
@@ -116,5 +124,5 @@ export function useRealm(onNotice) {
       throw e;
     }
   };
-  return { state, now, busy, snapshot, update };
+  return { state, now, busy, snapshot, update, queryWallet };
 }

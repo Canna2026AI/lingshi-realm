@@ -71,8 +71,8 @@ export default function Cultivation({ state, now, choose, notice, update }) {
           )}
           <div className="next-snapshot">
             <Clock size={13} />
-            <span>下次快照</span>
-            <Countdown nextAt={state.nextAt} now={now} />
+            <span>宗门轮次</span>
+            <span className="countdown">第 {state.round} 轮</span>
           </div>
         </div>
         <div
@@ -131,7 +131,7 @@ export default function Cultivation({ state, now, choose, notice, update }) {
         <div className="cultivation-foot">
           <span>
             {h
-              ? `距离下个金丹还需 ${Math.max(0,10 - h.pills)} 颗筑基丹`
+              ? `距离下个金丹还需 ${Math.max(0, 10 - h.pills)} 颗筑基丹`
               : "每持有 10 万灵石获得一个修炼单位"}
           </span>
           {recent && reward?.upgraded ? (

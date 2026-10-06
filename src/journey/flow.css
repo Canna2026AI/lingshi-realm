@@ -1233,3 +1233,486 @@
     bottom: 12%;
   }
 }
+/* Wallet-backed furnace. Interactive hit area covers the complete artwork. */
+.forge-wallet {
+  position: absolute;
+  left: 8%;
+  top: 32%;
+  width: 38%;
+  max-width: 520px;
+  z-index: 10;
+  font-family: "Songti SC", serif;
+}
+.forge-wallet form > label {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 2px;
+  margin-bottom: 9px;
+}
+.forge-wallet form > div {
+  display: flex;
+  gap: 7px;
+}
+.forge-wallet input[type="text"],
+.forge-wallet input:not([type]) {
+  min-width: 0;
+  flex: 1;
+  background: #08202090;
+  border: 1px solid #c7ae7066;
+  color: #f2e5cc;
+  font: inherit;
+  font-size: 12px;
+  padding: 10px;
+}
+.forge-wallet form button {
+  white-space: nowrap;
+  border: 1px solid #c7ae7066;
+  padding: 8px 13px;
+  background: #b9974525;
+  font-size: 12px;
+}
+.forge-sample {
+  font-size: 10px !important;
+  opacity: 0.7;
+  margin: 9px 0 16px !important;
+  border-bottom: 1px solid #dbcba344 !important;
+}
+.forge-balance > span,
+.forge-balance > small {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+.forge-balance > strong {
+  display: block;
+  font-weight: 400;
+  font-size: 38px;
+  color: #e7c382;
+  margin: 6px 0;
+}
+.forge-tier-counts {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px;
+  margin: 12px 0;
+}
+.forge-tier-counts > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #e9d39709;
+  padding: 7px 2px;
+  border: 1px solid #dbcba320;
+}
+.forge-tier-counts img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+.forge-tier-counts span {
+  font-size: 10px;
+}
+.forge-tier-counts b {
+  font-size: 16px;
+  font-weight: 400;
+  margin-top: 4px;
+}
+.forge-auto {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 10px;
+}
+.forge-auto small {
+  opacity: 0.6;
+  font-size: 9px;
+}
+.forge-auto input {
+  width: auto;
+  accent-color: #caae71;
+}
+.forge-await,
+.forge-error {
+  font-size: 12px;
+  line-height: 1.8;
+}
+.forge-error {
+  color: #e9b88b;
+}
+.forge-hit {
+  position: absolute !important;
+  right: 5%;
+  top: 11%;
+  width: 45%;
+  height: 74%;
+  z-index: 7;
+  touch-action: none;
+  user-select: none;
+  cursor: pointer !important;
+}
+.forge-hit:focus-visible {
+  outline-offset: -18px !important;
+  border-radius: 25px !important;
+}
+.flow-alchemy .brew-stone {
+  pointer-events: none;
+}
+.flow-alchemy .flow-alchemy-controls {
+  top: auto;
+  bottom: 16%;
+  max-width: 40%;
+}
+.forge-tier-select {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 13px;
+}
+.forge-tier-select button {
+  padding: 5px 10px !important;
+  border: 1px solid #dbcba350 !important;
+  font-size: 11px !important;
+}
+.forge-tier-select button[aria-pressed="true"] {
+  background: #d6b26b25;
+  color: #e8c78b;
+  border-color: #d6b26b !important;
+}
+.flow-journey .scene-furnace .j-copy,
+.flow-journey .scene-combine .j-copy {
+  top: 16%;
+}
+.flow-journey .scene-furnace .j-copy h1,
+.flow-journey .scene-combine .j-copy h1 {
+  font-size: clamp(32px, 3.4vw, 53px);
+  margin-bottom: 9px;
+}
+.flow-journey .scene-furnace .j-copy p,
+.flow-journey .scene-combine .j-copy p {
+  font-size: 12px;
+}
+.forge-touch-wave {
+  position: absolute;
+  left: 71%;
+  top: 50%;
+  width: 130px;
+  height: 130px;
+  border: 1px solid #ebd598;
+  box-shadow: 0 0 40px #dcb85b50;
+  border-radius: 50%;
+  animation: forge-pulse 1.4s ease-out both;
+}
+@keyframes forge-pulse {
+  from {
+    transform: translate(-50%, -50%) scale(0.3);
+    opacity: 1;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(3);
+    opacity: 0;
+  }
+}
+.journey-area-hint {
+  position: absolute;
+  right: 20px;
+  top: 44%;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 35px;
+  font-size: 8px;
+  letter-spacing: 1px;
+  opacity: 0.4;
+  pointer-events: none;
+  writing-mode: vertical-rl;
+}
+.board-filters {
+  gap: 18px;
+}
+.board-search {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.board-search input {
+  width: auto;
+  min-width: 0;
+  flex: 1;
+}
+.board-search button {
+  padding: 7px 12px !important;
+  white-space: nowrap;
+}
+.board-tier-legend {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  margin: 4px 0 12px;
+}
+.board-tier-legend > span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+}
+.board-tier-legend img {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+}
+.board-tier-legend small {
+  opacity: 0.65;
+  font-size: 8px;
+}
+.board-scroll .tier-column {
+  padding-left: 5px;
+  padding-right: 5px;
+  text-align: center !important;
+  letter-spacing: 0;
+}
+.board-scroll table {
+  min-width: 800px;
+}
+.board-scroll {
+  overflow-x: auto;
+}
+.board-card-tiers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 9px;
+  margin-top: 7px;
+}
+.board-card-tiers > span {
+  font-size: 8px;
+  white-space: nowrap;
+}
+@media (max-width: 720px) {
+  .forge-wallet {
+    top: 24%;
+    left: 7%;
+    width: 86%;
+    max-width: none;
+  }
+  .forge-wallet form > label {
+    font-size: 9px;
+    margin-bottom: 5px;
+  }
+  .forge-wallet input:not([type]) {
+    font-size: 9px;
+    padding: 8px;
+  }
+  .forge-wallet form button {
+    font-size: 10px;
+    padding: 6px 10px;
+  }
+  .forge-sample {
+    font-size: 8px !important;
+    margin: 6px 0 8px !important;
+  }
+  .forge-balance {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 3px 8px;
+  }
+  .forge-balance > span {
+    font-size: 9px;
+  }
+  .forge-balance > strong {
+    font-size: 25px;
+    grid-row: span 2;
+    margin: 0;
+  }
+  .forge-balance > small {
+    font-size: 8px;
+  }
+  .forge-tier-counts {
+    margin: 8px 0;
+    gap: 5px;
+  }
+  .forge-tier-counts > div {
+    flex-direction: row;
+    justify-content: center;
+    gap: 3px;
+    flex-wrap: wrap;
+    padding: 4px 1px;
+  }
+  .forge-tier-counts img {
+    width: 22px;
+    height: 22px;
+  }
+  .forge-tier-counts span {
+    font-size: 8px;
+  }
+  .forge-tier-counts b {
+    font-size: 11px;
+    margin: 0;
+  }
+  .forge-auto {
+    font-size: 8px;
+    gap: 5px;
+  }
+  .forge-auto small {
+    font-size: 7px;
+  }
+  .forge-await,
+  .forge-error {
+    font-size: 9px;
+  }
+  .flow-alchemy .brew-stone {
+    top: 48%;
+    right: 26%;
+    width: 86px;
+    height: 115px;
+  }
+  .cauldron-art {
+    right: 13%;
+    bottom: 16%;
+    width: 65%;
+    height: 30%;
+  }
+  .forge-hit {
+    right: 5%;
+    top: 47%;
+    width: 86%;
+    height: 36%;
+  }
+  .flow-alchemy .flow-alchemy-controls {
+    left: 7%;
+    right: 7%;
+    bottom: 10%;
+    max-width: none;
+  }
+  .forge-tier-select {
+    gap: 5px;
+    margin-bottom: 8px;
+  }
+  .forge-tier-select button {
+    font-size: 9px !important;
+    padding: 4px 8px !important;
+  }
+  .flow-alchemy-controls .journey-action {
+    font-size: 10px;
+    padding: 7px 15px;
+  }
+  .flow-alchemy-outcome {
+    font-size: 9px;
+    margin: 7px 0 3px;
+    line-height: 1.5;
+  }
+  .flow-alchemy-result {
+    top: 58% !important;
+    left: 59% !important;
+    width: 90px;
+    height: 90px;
+  }
+  .pill-orbit {
+    top: 58%;
+    left: 59%;
+    transform: scale(0.48);
+  }
+  .flow-journey .scene-furnace .j-copy,
+  .flow-journey .scene-combine .j-copy {
+    top: 13%;
+  }
+  .flow-journey .scene-furnace .j-copy h1,
+  .flow-journey .scene-combine .j-copy h1 {
+    font-size: 28px;
+    margin-bottom: 5px;
+  }
+  .flow-journey .scene-furnace .j-copy p,
+  .flow-journey .scene-combine .j-copy p {
+    font-size: 9px;
+    line-height: 1.6;
+  }
+  .scene-furnace .scene-next,
+  .scene-combine .scene-next {
+    bottom: 5%;
+    font-size: 9px !important;
+    right: 7%;
+    padding: 5px 0 !important;
+  }
+  .journey-area-hint {
+    right: 6px;
+    font-size: 7px;
+    top: 46%;
+    gap: 25px;
+    opacity: 0.25;
+  }
+  .board-search {
+    flex-basis: 100%;
+  }
+  .board-search input {
+    width: 100%;
+    font-size: 9px;
+    padding: 7px 8px;
+  }
+  .board-search button {
+    font-size: 9px !important;
+    padding: 6px 8px !important;
+  }
+  .board-tier-legend {
+    gap: 8px;
+    margin-bottom: 9px;
+  }
+  .board-tier-legend > span {
+    flex-direction: column;
+    gap: 2px;
+    font-size: 8px;
+  }
+  .board-tier-legend img {
+    width: 22px;
+    height: 22px;
+  }
+  .board-tier-legend small {
+    font-size: 6px;
+  }
+  .board-podium {
+    margin-bottom: 5px;
+    padding-bottom: 7px;
+  }
+  .board-podium img {
+    width: 38px;
+    height: 38px;
+  }
+  .board-mobile-cards > button {
+    padding: 9px 3px !important;
+  }
+  .board-mobile-cards small {
+    font-size: 8px;
+  }
+  .board-card-tiers b {
+    font-size: 8px;
+  }
+}
+.forge-wallet,
+.forge-hit {
+  pointer-events: auto;
+}
+@media (min-width: 721px) {
+  .flow-alchemy .flow-alchemy-controls {
+    bottom: 10%;
+  }
+}
+.forge-hit {
+  height: 76%;
+}
+@media (max-width: 720px) {
+  .forge-hit {
+    height: 40%;
+  }
+}
+@media (max-width: 720px) {
+  .forge-tier-counts > div {
+    display: grid;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    gap: 1px;
+    padding: 4px 0;
+  }
+  .forge-tier-counts img {
+    width: 20px;
+    height: 20px;
+  }
+}

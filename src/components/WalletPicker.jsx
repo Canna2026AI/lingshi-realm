@@ -9,8 +9,15 @@ import {
   units,
   percentage,
 } from "../engine";
-export default function WalletPicker({ state, onClose, onSelect }) {
-  const [query, setQuery] = useState("");
+export default function WalletPicker({
+  state,
+  onClose,
+  onSelect,
+  queryWallet,
+}) {
+  const [query, setQuery] = useState(""),
+    [pending, setPending] = useState(false),
+    [error, setError] = useState("");
   const rows = sortedHolders(state.holders).filter((h) =>
     h.address.toLowerCase().includes(query.toLowerCase()),
   );
@@ -28,6 +35,29 @@ export default function WalletPicker({ state, onClose, onSelect }) {
           onChange={(e) => setQuery(e.target.value)}
         />
       </label>
+      <button
+        className="button primary"
+        disabled={pending}
+        onClick={async () => {
+          setPending(true);
+          setError("");
+          try {
+            const next = await queryWallet(query);
+            await onSelect(next.selected);
+          } catch (e) {
+            setError(e.message);
+          } finally {
+            setPending(false);
+          }
+        }}
+      >
+        {pending ? "查询中…" : "查询此钱包"}
+      </button>
+      {error && (
+        <p role="alert" className="form-error">
+          {error}
+        </p>
+      )}
       <div className="wallet-options">
         {rows.map((h) => (
           <button
@@ -51,9 +81,7 @@ export default function WalletPicker({ state, onClose, onSelect }) {
             </span>
             <span className="wallet-option-end">
               <span>
-                {units(h.balance)
-                  ? `${units(h.balance)} 修炼单位`
-                  : "未达门槛"}
+                {units(h.balance) ? `${units(h.balance)} 修炼单位` : "未达门槛"}
               </span>
               <ArrowRight size={17} />
             </span>

@@ -10,16 +10,8 @@ export const scenes = [
     lines: ["一点灵光，万象始生。", "触碰灵星，开启你的仙途。"],
   },
   {
-    id: "gate",
-    chapter: 1,
-    span: 1.7,
-    title: "持灵石，入仙门",
-    lines: ["钱包是洞府，持有是闭关。", "穿过山门，寻一线仙缘。"],
-    image: "gate",
-  },
-  {
     id: "gallery",
-    chapter: 2,
+    chapter: 1,
     span: 2,
     title: "灵物有灵",
     lines: ["持灵石，凝丹进阶。", "点选灵物，读懂仙途。"],
@@ -28,16 +20,16 @@ export const scenes = [
   },
   {
     id: "furnace",
-    chapter: 3,
+    chapter: 2,
     span: 2,
-    title: "灵气入炉",
-    lines: ["灵石为引，灵气凝丹。", "按住灵石，点燃这一炉。"],
+    title: "我的熔炼炉",
+    lines: ["输入洞府地址，查看持仓与仙阶。", "灵物十合一，按住熔炼炉聚气。"],
     image: "cave",
     flow: true,
   },
   {
     id: "combine",
-    chapter: 4,
+    chapter: 3,
     span: 2,
     title: "十丹结金",
     lines: ["十颗筑基丹，合成一枚金丹。", "旧丹消耗，新阶诞生。"],
@@ -46,14 +38,14 @@ export const scenes = [
   },
   {
     id: "leaderboard",
-    chapter: 5,
+    chapter: 4,
     span: 2,
     title: "宗门天骄榜",
     lines: [],
     image: "gate",
   },
 ];
-export const chapters = ["启灵", "山门", "灵物", "炼丹", "结金", "天骄"];
+export const chapters = ["启灵", "灵物", "炼丹", "结金", "天骄"];
 export const realmNames = ["赤霞境", "青岚境", "玄霜境"];
 export const realmImages = ["redrealm", "jaderealm", "bluerealm"];
 export const totalSpan = scenes.reduce((n, s) => n + s.span, 0);

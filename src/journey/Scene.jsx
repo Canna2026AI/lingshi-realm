@@ -97,6 +97,7 @@ export default function Scene({
         <Alchemy
           key={scene.id}
           mode={scene.id}
+          realm={realm}
           interactive={interactive}
           reduced={reduced}
           holding={holding}

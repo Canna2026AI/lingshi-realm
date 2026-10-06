@@ -8,13 +8,14 @@ import {
   number,
   rankName,
 } from "../engine";
-import { Countdown } from "../components/UI";
 import Inventory from "../components/Inventory";
 import { flowArt } from "./Gallery";
 export default function RealmBoard({ realm, notice, restart }) {
-  const { state, now, update, snapshot, busy } = realm;
+  const { state, update, queryWallet } = realm;
   const [mode, setMode] = useState("weight"),
     [query, setQuery] = useState(""),
+    [draft, setDraft] = useState(""),
+    [searching, setSearching] = useState(false),
     [detail, setDetail] = useState(null),
     [copied, setCopied] = useState(false);
   const dialog = useRef(),
@@ -98,12 +99,51 @@ export default function RealmBoard({ realm, notice, restart }) {
                 灵石榜
               </button>
             </div>
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="搜索完整或部分地址"
-              aria-label="搜索天骄地址"
-            />
+            <form
+              className="board-search"
+              onSubmit={(e) => {
+                e.preventDefault();
+                setQuery(draft.trim());
+              }}
+              data-no-nav
+            >
+              <input
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                placeholder="输入完整钱包地址，或部分地址搜索"
+                aria-label="搜索天骄地址"
+                spellCheck={false}
+              />
+              <button type="submit">搜索</button>
+              <button
+                type="button"
+                disabled={searching}
+                onClick={async () => {
+                  setSearching(true);
+                  try {
+                    const next = await queryWallet(draft);
+                    setDraft(next.selected);
+                    setQuery(next.selected);
+                    setDetail(next.selected);
+                  } catch (e) {
+                    notice(e.message);
+                  } finally {
+                    setSearching(false);
+                  }
+                }}
+              >
+                {searching ? "查询中…" : "查询持仓"}
+              </button>
+            </form>
+          </div>
+          <div className="board-tier-legend">
+            {TIERS.map((t) => (
+              <span key={t.field}>
+                <img src={flowArt(t.asset)} alt="" />
+                {t.name}
+                <small>权重 {number(t.weight)}</small>
+              </span>
+            ))}
           </div>
           {!query && (
             <div className="board-podium">
@@ -142,6 +182,11 @@ export default function RealmBoard({ realm, notice, restart }) {
                   <th>道友</th>
                   <th>灵石余额</th>
                   <th>仙阶</th>
+                  {TIERS.map((t) => (
+                    <th key={t.field} className="tier-column">
+                      {t.name}
+                    </th>
+                  ))}
                   <th>权重</th>
                 </tr>
               </thead>
@@ -163,6 +208,11 @@ export default function RealmBoard({ realm, notice, restart }) {
                     </td>
                     <td>{number(x.balance)}</td>
                     <td>{rankName(x)}</td>
+                    {TIERS.map((t) => (
+                      <td key={t.field} className="tier-column">
+                        {number(x[t.field])}
+                      </td>
+                    ))}
                     <td>{number(weight(x))}</td>
                   </tr>
                 ))}
@@ -184,6 +234,13 @@ export default function RealmBoard({ realm, notice, restart }) {
                         ? "我的洞府"
                         : `${number(x.balance)} 灵石`}
                     </small>
+                    <span className="board-card-tiers">
+                      {TIERS.map((t) => (
+                        <span key={t.field}>
+                          {t.name} <b>{x[t.field]}</b>
+                        </span>
+                      ))}
+                    </span>
                   </span>
                   <span>
                     {number(weight(x))}
@@ -195,7 +252,14 @@ export default function RealmBoard({ realm, notice, restart }) {
             {!rows.length && (
               <div className="board-empty">
                 未找到匹配的道友
-                <button onClick={() => setQuery("")}>清除搜索</button>
+                <button
+                  onClick={() => {
+                    setQuery("");
+                    setDraft("");
+                  }}
+                >
+                  清除搜索
+                </button>
               </div>
             )}
           </div>
@@ -241,10 +305,7 @@ export default function RealmBoard({ realm, notice, restart }) {
               当前权重<b>{number(weight(h))}</b>
             </div>
             <div>
-              下一炉
-              <b>
-                <Countdown nextAt={state.nextAt} now={now} />
-              </b>
+              当前仙阶<b>{rankName(h)}</b>
             </div>
           </div>
           <Inventory holder={h} update={update} notice={notice} />
@@ -260,18 +321,10 @@ export default function RealmBoard({ realm, notice, restart }) {
             >
               {state.selected === h.address ? "已选中我的洞府" : "设为我的洞府"}
             </button>
-            <button
-              className="journey-action"
-              disabled={busy}
-              onClick={() => snapshot(true)}
-            >
-              {busy ? "凝丹中…" : "体验一轮快照"}
-            </button>
             <a href="/realm">完整修炼页面 ↗</a>
           </div>
           <p className="cave-help">
-            每 {state.config.intervalMinutes} 分钟快照 · 100,000 灵石 /
-            单位。合丹不消耗灵石。
+            100,000 灵石 / 修炼单位 · 合丹消耗已有仙阶材料，灵石余额保留。
           </p>
           <h3>近期突破</h3>
           <div className="cave-events">

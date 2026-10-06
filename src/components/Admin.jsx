@@ -1,4 +1,5 @@
 import React from "react";
+import { getHolderProvider, refreshHolderData } from "../holderProvider";
 import { useState } from "react";
 import {
   Info,
@@ -17,13 +18,7 @@ import {
   validateHolders,
   validateConfig,
 } from "../engine";
-export default function Admin({
-  state,
-  update,
-  notice,
-  snapshot,
-  busy,
-}) {
+export default function Admin({ state, update, notice, snapshot, busy }) {
   const [config, setConfig] = useState({ ...state.config }),
     [drafts, setDrafts] = useState(
       state.holders.map((h) => ({
@@ -39,7 +34,11 @@ export default function Admin({
     setError("");
     setSaving(true);
     try {
-      const normalized = { ...config, ca: config.ca.trim() },
+      const normalized = {
+          ...config,
+          ca: config.ca.trim(),
+          holderApiUrl: (config.holderApiUrl || "").trim(),
+        },
         holders = drafts.map((h) => ({
           ...h,
           address: h.address.trim(),
@@ -47,9 +46,15 @@ export default function Admin({
         }));
       validateConfig(normalized);
       validateHolders(holders, normalized.totalSupply);
-      const next = await update((s) =>
-        saveConfiguration(s, normalized, holders),
-      );
+      const next = await update(async (s) => {
+        const configured = saveConfiguration(s, normalized, holders);
+        const data = await getHolderProvider(normalized).load({
+          ca: normalized.ca,
+          chainId: 56,
+          state: configured,
+        });
+        return refreshHolderData(configured, data);
+      });
       setDrafts(
         next.holders.map((h) => ({
           address: h.address,
@@ -81,7 +86,12 @@ export default function Admin({
   const reset = async () => {
     const next = await update(() => freshState());
     setConfig({ ...next.config });
-    setDrafts(next.holders.map(h => ({ address: h.address, balance: String(h.balance) })));
+    setDrafts(
+      next.holders.map((h) => ({
+        address: h.address,
+        balance: String(h.balance),
+      })),
+    );
     setError("");
     setConfirm(false);
     notice("仙宗数据已重置");
@@ -109,6 +119,19 @@ export default function Admin({
             />
             <small>更换 CA 后重新加载 Holder，并清空当前修炼记录。</small>
           </label>
+          <label className="span-two">
+            Holder 数据接口
+            <input
+              aria-label="Holder 数据接口"
+              placeholder="https://服务地址/api/holders（待接入时填写）"
+              value={config.holderApiUrl || ""}
+              onChange={(e) => change("holderApiUrl", e.target.value)}
+            />
+            <small>
+              保存 CA
+              后通过独立接口读取供应量、地址余额和更新时间。接口失败时保留原数据。
+            </small>
+          </label>
           <label>
             总供应量
             <input
@@ -121,7 +144,7 @@ export default function Admin({
             />
           </label>
           <div className="form-label">
-            快照周期
+            快照参考周期
             <div className="segmented">
               {[5, 10].map((n) => (
                 <button
@@ -135,6 +158,9 @@ export default function Admin({
               ))}
             </div>
           </div>
+          <p className="span-two admin-help">
+            当前只由后台手动执行，不会按参考周期自动发丹。
+          </p>
           <div className="threshold span-two">
             <span>
               参与门槛 <b>100,000 枚</b>
@@ -244,7 +270,8 @@ export default function Admin({
           </button>
         </div>
         <p className="admin-help">
-          快照读取已保存的 Holder 数据；编辑后请先保存配置。
+          快照仅在本后台执行。每次执行先读取当前 Holder
+          持仓，再发丹；前台不执行快照。
         </p>
         {confirm && (
           <div className="reset-confirm">

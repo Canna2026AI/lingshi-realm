@@ -72,16 +72,18 @@ export function useJourney(started) {
       window.removeEventListener("touchmove", lock);
     };
   }, []);
-  const jump = (index) => {
+  const jump = (index, sourceIndex = view.current.index) => {
     if (active.current) return;
     const target = (sceneOffset(index) + 0.01) * window.innerHeight;
-    if (index === view.current.index) {
+    if (index === sourceIndex) {
       smooth.current = target / window.innerHeight;
       window.scrollTo({ top: target, behavior: "instant" });
       setPosition(positionAt(smooth.current));
       return;
     }
-    const launch = !reduced && view.current.index === 0 && index > 0;
+    if (sourceIndex !== view.current.index)
+      setPosition(positionAt(sceneOffset(sourceIndex) + 0.01));
+    const launch = !reduced && sourceIndex === 0 && index > 0;
     const start = performance.now();
     active.current = true;
     setTransition({ target: index, mix: 0, launch: 0 });

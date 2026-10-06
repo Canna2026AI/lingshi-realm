@@ -35,7 +35,7 @@ export default function App() {
     timer.current = setTimeout(() => setToast(null), 4500);
   };
   useEffect(() => () => clearTimeout(timer.current), []);
-  const { state, now, busy, snapshot, update } = useRealm(notice);
+  const { state, now, update, queryWallet } = useRealm(notice);
   const choose = () => setWalletOpen(true);
   const select = async (address) => {
     await update((s) => ({ ...s, selected: address }));
@@ -165,7 +165,7 @@ export default function App() {
           />
           <div className="board-grid section-gap">
             <Leaderboard state={state} notice={notice} />
-            <SnapshotFeed state={state} snapshot={snapshot} busy={busy} />
+            <SnapshotFeed state={state} />
           </div>
           <section id="rules" className="rules section-gap">
             <div className="rules-title">
@@ -217,6 +217,7 @@ export default function App() {
       </footer>
       {walletOpen && (
         <WalletPicker
+          queryWallet={queryWallet}
           state={state}
           onClose={() => setWalletOpen(false)}
           onSelect={select}

@@ -9,6 +9,7 @@ export const TIERS = [
 ];
 export const DEFAULT_CONFIG = {
   ca: "",
+  holderApiUrl: "",
   totalSupply: 1_000_000_000,
   intervalMinutes: 5,
   unitTokens: UNIT_TOKENS,
@@ -97,6 +98,13 @@ export function validateConfig(config) {
     throw new Error("快照周期仅支持 5 或 10 分钟。");
   if (config.ca && !/^0x[0-9a-fA-F]{40}$/.test(config.ca))
     throw new Error("Token CA 必须是 0x 开头的 42 位合约地址。");
+  if (
+    config.holderApiUrl &&
+    !/^(https:\/\/[^\s]+|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/[^\s]*|\/(?!\/)[^\s]*)$/.test(
+      config.holderApiUrl,
+    )
+  )
+    throw new Error("Holder 接口须为 HTTPS 地址或站内 /api 路径。");
   if (config.unitTokens !== UNIT_TOKENS)
     throw new Error("当前修炼单位固定为 100,000 LINGSHI。");
   if (
@@ -259,7 +267,10 @@ export function setAutoCombine(state, address, enabled, now = Date.now()) {
 export function saveConfiguration(state, config, drafts, now = Date.now()) {
   validateConfig(config);
   validateHolders(drafts, config.totalSupply);
-  if (state.config.ca !== config.ca)
+  if (
+    state.config.ca !== config.ca ||
+    (state.config.holderApiUrl || "") !== (config.holderApiUrl || "")
+  )
     return freshState(now, config, Math.floor(now % 100000));
   const prior = new Map(state.holders.map((h) => [h.address.toLowerCase(), h]));
   const holders = drafts.map((h) => ({

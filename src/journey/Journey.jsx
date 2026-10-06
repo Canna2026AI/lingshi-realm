@@ -74,6 +74,10 @@ export default function Journey() {
         ? clamp((position.progress - 0.5) / 0.5) ** 2 *
           (3 - 2 * clamp((position.progress - 0.5) / 0.5))
         : 0;
+  const activeIndex =
+    !traveling && entering >= 0.5
+      ? Math.min(position.index + 1, scenes.length - 1)
+      : position.index;
   useEffect(() => {
     document.documentElement.classList.add("journey-document");
     document.title = "灵石仙宗 · 灵气入炉，十丹结金";
@@ -155,9 +159,9 @@ export default function Journey() {
     setMenu(false);
     setCredits(false);
     setStarted(true);
-    requestAnimationFrame(() => jump(index));
+    requestAnimationFrame(() => jump(index, activeIndex));
   };
-  const next = () => go(Math.min(position.index + 1, scenes.length - 1));
+  const next = () => go(Math.min(activeIndex + 1, scenes.length - 1));
   const restart = () => go(0);
   const toggleFull = async () => {
     try {
@@ -211,6 +215,22 @@ export default function Journey() {
   return (
     <main
       ref={root}
+      onClick={(e) => {
+        if (
+          paused ||
+          traveling ||
+          holding.current ||
+          e.target.closest(
+            'button,a,input,select,textarea,label,[role="dialog"],[data-no-nav],.board-scroll',
+          )
+        )
+          return;
+        const target =
+          e.clientY < window.innerHeight / 2
+            ? activeIndex - 1
+            : activeIndex + 1;
+        if (target >= 0 && target < scenes.length) go(target);
+      }}
       onPointerMove={move}
       onPointerLeave={leave}
       className={`journey flow-journey is-started ${scene.light && !paused ? "j-light" : ""} ${reduced ? "j-reduced" : ""}`}
@@ -232,16 +252,19 @@ export default function Journey() {
           {entering > 0 && (
             <div
               className="j-scene-layer incoming"
-              style={{ opacity: entering }}
-              aria-hidden="true"
-              inert
+              style={{
+                opacity: entering,
+                pointerEvents: !traveling && entering >= 0.5 ? "auto" : "none",
+              }}
+              aria-hidden={traveling || entering < 0.5}
+              inert={traveling || entering < 0.5 ? true : undefined}
             >
               <Scene
                 scene={
                   scenes[transition ? transition.target : position.index + 1]
                 }
                 progress={0}
-                interactive={false}
+                interactive={!paused && !traveling && entering >= 0.5}
                 {...sceneProps}
               />
             </div>
@@ -261,6 +284,10 @@ export default function Journey() {
             aria-hidden="true"
           />
         )}
+        <div className="journey-area-hint" aria-hidden="true">
+          <span>上半屏 · 返回上一幕</span>
+          <span>下半屏 · 进入下一幕</span>
+        </div>
         <header className="j-header">
           <button
             className="j-menu-trigger"
@@ -311,15 +338,15 @@ export default function Journey() {
           <div className="journey-step-controls">
             <button
               aria-label="上一幕"
-              disabled={!position.index || traveling}
-              onClick={() => go(position.index - 1)}
+              disabled={!activeIndex || traveling}
+              onClick={() => go(activeIndex - 1)}
             >
               <ChevronLeft size={19} />
             </button>
             <button
               aria-label="下一幕"
               disabled={
-                position.index === scenes.length - 1 || traveling || !ready
+                activeIndex === scenes.length - 1 || traveling || !ready
               }
               onClick={next}
             >
@@ -397,7 +424,7 @@ export default function Journey() {
               十丹结金，道心长明。
             </h2>
             <p>
-              原创颗粒水墨 · 六幕修仙旅程
+              原创颗粒水墨 · 五幕修仙旅程
               <br />
               交互灵感 · The Monolith Project
               <br />
