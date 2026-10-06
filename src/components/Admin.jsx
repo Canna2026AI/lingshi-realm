@@ -56,7 +56,7 @@ export default function Admin({
           balance: String(h.balance),
         })),
       );
-      notice("配置已保存 · 当前使用本地 Holder，真实数据接口待接入");
+      notice("配置已保存");
     } catch (e) {
       setError(e.message);
     } finally {
@@ -90,7 +90,7 @@ export default function Admin({
     <section className="panel admin-workspace" aria-label="管理配置">
       <div className="admin-notice">
         <Info size={16} />
-        <span>当前使用本地 Holder，真实数据接口待接入</span>
+        <span>每轮快照按当前 Holder 持仓计算</span>
       </div>
       <form
         onSubmit={(e) => {
@@ -232,7 +232,7 @@ export default function Admin({
             onClick={() => snapshot()}
           >
             <Zap size={16} />
-            立即模拟快照
+            立即执行快照
           </button>
           <button
             type="button"

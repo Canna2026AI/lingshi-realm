@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 export default function Planet({
   progress,
+  launch = 0,
   reduced,
   paused,
   onEnter,
@@ -9,15 +10,21 @@ export default function Planet({
 }) {
   const host = useRef(),
     current = useRef(progress),
+    motion = useRef({ launch, paused }),
+    mouse = useRef({ x: 0, y: 0 }),
     [fallback, setFallback] = useState(false);
   current.current = progress;
+  motion.current = { launch, paused };
   useEffect(() => {
     const el = host.current;
     let renderer,
       frame = 0,
       texture,
       alive = true,
-      last = 0;
+      last = 0,
+      spin = 0.4 + performance.now() * 0.000085,
+      orbit = 0,
+      previous = 0;
     try {
       renderer = new THREE.WebGLRenderer({
         alpha: true,
@@ -42,6 +49,8 @@ export default function Planet({
     const material = new THREE.MeshStandardMaterial({
       color: 0x95aaa1,
       roughness: 1,
+      emissive: 0x19352c,
+      emissiveIntensity: 0.2,
     });
     const sphere = new THREE.Mesh(
       new THREE.SphereGeometry(1.4, 64, 40),
@@ -59,11 +68,15 @@ export default function Planet({
       material.map = map;
       material.color.set(0xffffff);
       material.needsUpdate = true;
+      stones.forEach((stone) => {
+        stone.material.map = map;
+        stone.material.needsUpdate = true;
+      });
       render();
     });
     const ring = new THREE.Group();
     group.add(ring);
-    ring.rotation.x = 0.5;
+    ring.rotation.x = 0.45;
     ring.rotation.z = -0.22;
     const curve = new THREE.EllipseCurve(
         0,
@@ -86,16 +99,40 @@ export default function Planet({
         }),
       ),
     );
-    const stones = Array.from({ length: 7 }, (_, i) => {
+    for (let i = 0; i < 2; i++) {
+      const extra = new THREE.LineLoop(
+        new THREE.BufferGeometry().setFromPoints(points),
+        new THREE.LineBasicMaterial({
+          color: 0xe7bd76,
+          transparent: true,
+          opacity: 0.6,
+        }),
+      );
+      extra.rotation.z = i ? 0.2 : -0.25;
+      extra.rotation.x = i ? 0.6 : -0.4;
+      extra.scale.setScalar(1 + i * 0.1);
+      ring.add(extra);
+    }
+    const atmosphere = new THREE.Mesh(
+      new THREE.SphereGeometry(1.42, 48, 32),
+      new THREE.MeshBasicMaterial({
+        color: 0xb6cfba,
+        transparent: true,
+        opacity: 0.055,
+        side: THREE.BackSide,
+      }),
+    );
+    group.add(atmosphere);
+    const stones = Array.from({ length: 9 }, (_, i) => {
       const m = new THREE.Mesh(
-        new THREE.DodecahedronGeometry(0.055 + (i % 3) * 0.02),
+        new THREE.DodecahedronGeometry(0.047 + (i % 3) * 0.019),
         new THREE.MeshStandardMaterial({ color: 0xd9ad67, roughness: 0.9 }),
       );
       ring.add(m);
       return m;
     });
-    const starPositions = new Float32Array(150 * 3);
-    for (let i = 0; i < 150; i++) {
+    const starPositions = new Float32Array(420 * 3);
+    for (let i = 0; i < 420; i++) {
       starPositions[i * 3] = Math.sin(i * 21.7) * 7;
       starPositions[i * 3 + 1] = Math.cos(i * 7.3) * 4;
       starPositions[i * 3 + 2] = -2 - Math.abs(Math.sin(i)) * 5;
@@ -110,7 +147,7 @@ export default function Planet({
         starsGeometry,
         new THREE.PointsMaterial({
           color: 0xe9d1a6,
-          size: 0.015,
+          size: 0.022,
           transparent: true,
           opacity: 0.65,
         }),
@@ -120,11 +157,24 @@ export default function Planet({
       if (!alive) return;
       const mobile = el.clientWidth < 720,
         p = reduced ? 0 : current.current;
-      group.position.set(mobile ? 0 : 0.95, mobile ? -0.7 : 0, 0);
-      group.scale.setScalar((mobile ? 0.65 : 1) * (1 + p * 0.9));
-      sphere.rotation.y = reduced ? 0.4 : time * 0.000045;
+      const entry = motion.current.launch;
+      const dt = Math.min(0.06, Math.max(0, (time - previous) / 1000));
+      previous = time;
+      const zoom = Math.max(entry, p * 0.75);
+      group.position.set(
+        (mobile ? 0 : 1.2) + mouse.current.x * 0.11,
+        (mobile ? -0.67 : 0.1) + mouse.current.y * 0.07,
+        zoom * 1.6,
+      );
+      group.scale.setScalar((mobile ? 0.66 : 1.25) * (1 + zoom * 0.5));
+      spin += reduced
+        ? 0
+        : dt * (0.085 + Math.sin(Math.PI * Math.min(1, entry * 1.7)) * 8);
+      orbit += reduced ? 0 : dt * (0.16 + entry * 1.6);
+      sphere.rotation.y = spin;
+      group.rotation.y += (mouse.current.x * 0.08 - group.rotation.y) * 0.05;
       stones.forEach((m, i) => {
-        const a = (i / 7) * Math.PI * 2 + (reduced ? 0 : time * 0.00008);
+        const a = (i / 9) * Math.PI * 2 + orbit;
         m.position.set(
           Math.cos(a) * 2.12,
           Math.sin(a) * 0.5,
@@ -145,15 +195,20 @@ export default function Planet({
     resize();
     const tick = (time) => {
       frame = 0;
-      if (document.hidden || paused || reduced) return;
-      if (time - last > 32) {
+      if (document.hidden || reduced) return;
+      if (motion.current.paused) {
+        frame = requestAnimationFrame(tick);
+        previous = time;
+        return;
+      }
+      if (time - last > (el.clientWidth < 720 ? 30 : 14)) {
         last = time;
         render(time);
       }
       frame = requestAnimationFrame(tick);
     };
     const resume = () => {
-      if (!frame && !document.hidden && !paused && !reduced)
+      if (!frame && !document.hidden && !reduced)
         frame = requestAnimationFrame(tick);
     };
     document.addEventListener("visibilitychange", resume);
@@ -175,7 +230,7 @@ export default function Planet({
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [reduced, paused]);
+  }, [reduced]);
   return (
     <>
       <div className="planet-canvas" ref={host} aria-hidden="true" />
@@ -183,6 +238,15 @@ export default function Planet({
       <button
         className="planet-hit"
         aria-label="触碰灵星进入山门"
+        onPointerMove={(event) => {
+          mouse.current = {
+            x: (event.clientX / window.innerWidth - 0.5) * 2,
+            y: -(event.clientY / window.innerHeight - 0.5) * 2,
+          };
+        }}
+        onPointerLeave={() => {
+          mouse.current = { x: 0, y: 0 };
+        }}
         onClick={onEnter}
         disabled={!enabled}
       />

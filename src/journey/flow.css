@@ -1150,3 +1150,86 @@
     height: 90px;
   }
 }
+
+/* Planet and landscape are independent layers so the sphere rotates in place. */
+.planet-landscape {
+  position: absolute;
+  inset: 0;
+  background: url("/images/flow/planet-landscape.webp") center/cover;
+  pointer-events: none;
+  transform: translate(var(--jx), var(--jy)) scale(1.025);
+}
+.planet-canvas {
+  z-index: 1;
+}
+.planet-aura {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 70% 48%, #e8d5a870, transparent 58%);
+}
+.scene-planet .j-copy {
+  left: 8.5%;
+  top: 26%;
+  max-width: 44%;
+  text-shadow: 0 2px 18px #03121099;
+}
+.scene-planet .j-copy h1 {
+  font-size: clamp(58px, 7.1vw, 116px);
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+.scene-planet .j-copy p {
+  font-size: clamp(14px, 1.6vw, 25px);
+}
+.scene-planet .j-copy p br:last-child {
+  display: none;
+}
+.scene-planet .journey-action {
+  border-radius: 40px;
+  border: 1px solid #ddb56b;
+  padding: 12px 34px;
+  background: #07161788;
+  color: #e7c687;
+  margin-top: 26px;
+}
+.planet-hit {
+  left: 48%;
+  right: 2%;
+  top: 10%;
+  bottom: 10%;
+  border-radius: 50% !important;
+}
+.journey-cloud-veil {
+  background:
+    radial-gradient(ellipse at 30% 70%, #f1e3c7, transparent 64%),
+    radial-gradient(ellipse at 90% 30%, #afc3b6, transparent 65%);
+  filter: blur(22px);
+}
+@media (max-width: 720px) {
+  .planet-landscape {
+    background-position: 32% center;
+  }
+  .scene-planet .j-copy {
+    top: 17%;
+    left: 8%;
+    max-width: 84%;
+  }
+  .scene-planet .j-copy h1 {
+    font-size: 46px;
+  }
+  .scene-planet .j-copy p {
+    font-size: 12px;
+  }
+  .scene-planet .journey-action {
+    padding: 10px 24px;
+    margin-top: 18px;
+  }
+  .planet-hit {
+    left: 3%;
+    right: 3%;
+    top: 39%;
+    bottom: 12%;
+  }
+}

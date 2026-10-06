@@ -81,3 +81,15 @@ export function nextRealm(realm) {
 }
 export const easeJourney = (t) =>
   t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
+
+// The opening keeps the planet visible during its first spin, then crossfades.
+export function transitionAt(elapsed, launching = false) {
+  const duration = launching ? 3600 : 2400;
+  const lead = launching ? 1100 : 0;
+  const t = clamp(elapsed / duration);
+  return {
+    mix: easeJourney(clamp((elapsed - lead) / (duration - lead))),
+    launch: launching ? easeJourney(t) : 0,
+    done: elapsed >= duration,
+  };
+}

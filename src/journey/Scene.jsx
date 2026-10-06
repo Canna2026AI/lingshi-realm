@@ -15,6 +15,7 @@ export default function Scene({
   restart,
   paused,
   ready,
+  launch,
 }) {
   const p = reduced ? 0 : progress;
   return (
@@ -39,9 +40,12 @@ export default function Scene({
       {scene.id === "planet" && (
         <>
           <div className="planet-sky" />
+          <div className="planet-landscape" />
+          <div className="planet-aura" style={{ opacity: launch * 0.5 }} />
           <Suspense fallback={<div className="planet-fallback" />}>
             <Planet
               progress={p}
+              launch={launch}
               reduced={reduced}
               paused={paused}
               onEnter={next}

@@ -21,6 +21,7 @@ const assets = [
   ...["gate", "mountain", "pilgrim"].map(art),
   ...[
     "planet-map",
+    "planet-landscape",
     "cauldron",
     "spirit-stone",
     "foundation-pill",
@@ -61,16 +62,17 @@ export default function Journey() {
     jump,
     move,
     leave,
-    veil,
+    transition,
     traveling,
-    cancel,
   } = useJourney(started);
   const scene = scenes[position.index],
     paused = menu || credits,
     ready = loaded === assets.length && !failed,
-    entering =
-      position.index < scenes.length - 1
-        ? clamp((position.progress - 0.65) / 0.35)
+    entering = transition
+      ? transition.mix
+      : position.index < scenes.length - 1
+        ? clamp((position.progress - 0.5) / 0.5) ** 2 *
+          (3 - 2 * clamp((position.progress - 0.5) / 0.5))
         : 0;
   useEffect(() => {
     document.documentElement.classList.add("journey-document");
@@ -103,6 +105,7 @@ export default function Journey() {
   }, [started, paused]);
   useEffect(() => {
     if (started || !ready) return;
+    setStarted(true);
     const awaken = () => setStarted(true);
     window.addEventListener("wheel", awaken, { passive: true });
     window.addEventListener("touchmove", awaken, { passive: true });
@@ -155,13 +158,7 @@ export default function Journey() {
     requestAnimationFrame(() => jump(index));
   };
   const next = () => go(Math.min(position.index + 1, scenes.length - 1));
-  const restart = () => {
-    cancel();
-    setMenu(false);
-    setCredits(false);
-    setStarted(false);
-    window.scrollTo({ top: 0, behavior: "instant" });
-  };
+  const restart = () => go(0);
   const toggleFull = async () => {
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
@@ -201,7 +198,16 @@ export default function Journey() {
     );
     setSound(next);
   };
-  const sceneProps = { reduced, holding, realm, next, restart, paused, ready };
+  const sceneProps = {
+    reduced,
+    holding,
+    realm,
+    next,
+    restart,
+    paused,
+    ready,
+    launch: transition?.launch || 0,
+  };
   return (
     <main
       ref={root}
@@ -215,7 +221,7 @@ export default function Journey() {
           inert={paused ? true : undefined}
           aria-hidden={paused}
         >
-          <div className="j-scene-layer" style={{ opacity: 1 - entering }}>
+          <div className="j-scene-layer" style={{ opacity: 1 }}>
             <Scene
               scene={scene}
               progress={position.progress}
@@ -231,7 +237,9 @@ export default function Journey() {
               inert
             >
               <Scene
-                scene={scenes[position.index + 1]}
+                scene={
+                  scenes[transition ? transition.target : position.index + 1]
+                }
                 progress={0}
                 interactive={false}
                 {...sceneProps}
@@ -246,10 +254,10 @@ export default function Journey() {
           realm={0}
           enabled={ready && !paused}
         />
-        {veil > 0 && (
+        {entering > 0 && entering < 1 && (
           <div
             className="journey-cloud-veil"
-            style={{ opacity: Math.min(1, veil * 1.35) }}
+            style={{ opacity: Math.sin(Math.PI * entering) * 0.16 }}
             aria-hidden="true"
           />
         )}

@@ -207,7 +207,7 @@ export default function Alchemy({ mode, reduced, holding, interactive }) {
               ? `${amount} 筑基丹 → 1 金丹${amount === 12 ? " + 2 筑基丹" : ""}`
               : "可按住灵石，也可点击点火炼丹"}
         </p>
-        <small>炼丹体验 · 持仓不变 · 不修改洞府资产</small>
+        <small>灵气入炉 · 十丹结金</small>
       </div>
     </div>
   );
