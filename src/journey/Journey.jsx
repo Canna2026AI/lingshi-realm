@@ -303,10 +303,10 @@ export default function Journey() {
             </span>
             <Menu size={24} />
           </button>
-          <a className="j-brand" href="/realm">
+          <button className="j-brand" onClick={() => go(0)} aria-label="灵石仙宗首页">
             <strong>灵石仙宗</strong>
             <small>LINGSHI REALM</small>
-          </a>
+          </button>
         </header>
         <footer className="j-footer">
           <div className="j-tools">
@@ -398,9 +398,9 @@ export default function Journey() {
                 </button>
               ))}
             </nav>
-            <a href="/realm" className="j-nav-realm">
-              完整修炼页面 ↗
-            </a>
+            <button onClick={() => go(2)} className="j-nav-realm">
+              我的熔炼炉 ↗
+            </button>
           </div>
         )}
         {credits && (

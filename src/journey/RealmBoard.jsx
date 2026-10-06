@@ -321,7 +321,6 @@ export default function RealmBoard({ realm, notice, restart }) {
             >
               {state.selected === h.address ? "已选中我的洞府" : "设为我的洞府"}
             </button>
-            <a href="/realm">完整修炼页面 ↗</a>
           </div>
           <p className="cave-help">
             100,000 灵石 / 修炼单位 · 合丹消耗已有仙阶材料，灵石余额保留。

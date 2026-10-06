@@ -10,14 +10,18 @@
     {
       "source": "/admin/",
       "destination": "/index.html"
-    },
+    }
+  ],
+  "redirects": [
     {
       "source": "/realm",
-      "destination": "/index.html"
+      "destination": "/",
+      "permanent": true
     },
     {
       "source": "/realm/",
-      "destination": "/index.html"
+      "destination": "/",
+      "permanent": true
     }
   ]
 }
