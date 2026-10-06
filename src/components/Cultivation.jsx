@@ -9,10 +9,11 @@ import {
 } from "lucide-react";
 import { number, percentage, units, weight, shortAddress } from "../engine";
 import { Pill, CopyAddress, Countdown } from "./UI";
+import Inventory from "./Inventory";
 import { RewardEffect } from "./Effects";
 export default function Cultivation({ state, now, choose, notice, update }) {
   const h = state.holders.find((h) => h.address === state.selected),
-    u = h ? units(h.balance, state.config.totalSupply) : 0,
+    u = h ? units(h.balance) : 0,
     reward = h && state.lastResult?.rewards[h.address],
     recent = state.lastResult && now - state.lastResult.time < 4500;
   const claim = async () => {
@@ -63,7 +64,7 @@ export default function Cultivation({ state, now, choose, notice, update }) {
           {h ? (
             <span className={`eligibility ${u ? "eligible" : ""}`}>
               <CheckCircle2 size={13} />
-              {u ? "已达到修炼门槛" : "尚未达到 0.1% 门槛"}
+              {u ? "已达到修炼门槛" : "尚未达到 10 万灵石门槛"}
             </span>
           ) : (
             <span className="muted">选择一个钱包，开启你的修炼之旅</span>
@@ -115,6 +116,7 @@ export default function Cultivation({ state, now, choose, notice, update }) {
             <strong className="gold">{h ? weight(h) : "—"}</strong>
           </div>
         </div>
+        {h && <Inventory holder={h} update={update} notice={notice} />}
         {h && (
           <div
             className="pill-meter"
@@ -129,8 +131,8 @@ export default function Cultivation({ state, now, choose, notice, update }) {
         <div className="cultivation-foot">
           <span>
             {h
-              ? `距离下个金丹还需 ${10 - h.pills} 颗筑基丹`
-              : "每持仓 0.1% 获得一个修炼单位"}
+              ? `距离下个金丹还需 ${Math.max(0,10 - h.pills)} 颗筑基丹`
+              : "每持有 10 万灵石获得一个修炼单位"}
           </span>
           {recent && reward?.upgraded ? (
             <b className="gold">十丹结金，突破成功</b>

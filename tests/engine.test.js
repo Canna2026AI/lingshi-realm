@@ -10,97 +10,156 @@ import {
   sortedHolders,
   parseState,
   weight,
+  combineInventory,
+  combineWallet,
+  setAutoCombine,
+  TIERS,
+  emptyInventory,
 } from "../src/engine.js";
-test("20 valid unique addresses; balances do not exceed supply; boundary wallets", () => {
+test("20 valid unique addresses and exact fixed unit boundaries", () => {
   const s = freshState(1000);
   assert.equal(s.holders.length, 20);
   validateHolders(s.holders, s.config.totalSupply);
   assert.equal(new Set(s.holders.map((h) => h.address)).size, 20);
-  assert.equal(
-    s.holders.filter((h) => units(h.balance, s.config.totalSupply) > 0).length,
-    12,
+  assert.deepEqual(
+    [units(99999), units(100000), units(350000), units(500000)],
+    [0, 1, 3, 5],
   );
+  assert.equal(s.config.intervalMinutes, 5);
 });
-test("exact threshold and floor, including non-divisible supply", () => {
-  assert.equal(units(999999, 1e9), 0);
-  assert.equal(units(1000000, 1e9), 1);
-  assert.equal(units(3000000, 1e9), 3);
-  assert.equal(units(3500000, 1e9), 3);
-  assert.equal(units(1000000, 1000000001), 0);
-});
-test("one snapshot is idempotent across serialized refresh", () => {
+test("snapshot is idempotent after refresh and emitted quantities match units", () => {
   const s = freshState(1000),
-    next = applySnapshot(s, "round-1", 2000),
-    loaded = parseState(JSON.stringify(next));
-  assert.equal(loaded.round, 1);
-  assert.equal(applySnapshot(loaded, "round-1", 3000), loaded);
-  assert.equal(next.lastResult.participants, 12);
-  assert.equal(next.lastResult.totalPills, 62);
+    n = applySnapshot(s, "r", 2000),
+    loaded = parseState(JSON.stringify(n));
+  assert.equal(applySnapshot(loaded, "r", 3000), loaded);
+  assert.equal(
+    n.lastResult.totalPills,
+    s.holders.reduce((a, h) => a + units(h.balance), 0),
+  );
+  assert.equal(n.lastResult.participants, 17);
+  for (const old of s.holders) {
+    const h = n.holders.find((x) => x.address === old.address);
+    const base = TIERS.reduce((a, t, i) => a + h[t.field] * 10 ** i, 0);
+    assert.equal(base, units(old.balance));
+  }
 });
-test("12 pills yield one golden core and two remaining pills; weight 14", () => {
-  let s = freshState(1000);
-  const address = s.holders.find((h) => h.balance === 3500000).address;
-  for (let i = 1; i <= 4; i++) s = applySnapshot(s, `round-${i}`, 1000 + i);
-  const h = s.holders.find((h) => h.address === address);
+test("12 pills consume ten and retain two; 20 percent upgrade weight boost", () => {
+  const { holder: h } = combineInventory({
+    ...emptyInventory(),
+    pills: 12,
+    balance: 100000,
+  });
   assert.equal(h.pills, 2);
   assert.equal(h.cores, 1);
   assert.equal(weight(h), 14);
+  assert.equal(h.balance, 100000);
+  for (let i = 0; i < 4; i++)
+    assert.equal(TIERS[i + 1].weight, TIERS[i].weight * 10 * 1.2);
 });
-test("multiple cores upgrade at once and every emitted reward matches ledger", () => {
-  let s = freshState(1000);
-  s.holders[0].pills = 8;
-  const n = applySnapshot(s, "multi", 2000);
-  assert.equal(n.holders[0].cores, 2);
-  assert.equal(n.holders[0].pills, 6);
-  for (const h of n.holders) {
-    const old = s.holders.find((x) => x.address === h.address);
-    const pills = n.events
-      .filter((e) => e.type === "pill" && e.address === h.address)
-      .reduce((a, e) => a + e.amount, 0);
-    const cores = n.events
-      .filter((e) => e.type === "core" && e.address === h.address)
-      .reduce((a, e) => a + e.amount, 0);
-    assert.equal(h.pills + 10 * (h.cores - old.cores), old.pills + pills);
-    assert.equal(h.cores - old.cores, cores);
-  }
+test("all five tiers cascade and conserve base materials including excess top tier", () => {
+  const { holder: h } = combineInventory({
+    ...emptyInventory(),
+    pills: 234567,
+  });
+  assert.deepEqual(
+    TIERS.map((t) => h[t.field]),
+    [7, 6, 5, 4, 23],
+  );
+  assert.equal(
+    TIERS.reduce((a, t, i) => a + h[t.field] * 10 ** i, 0),
+    234567,
+  );
 });
-test("ranking is balance based and unchanged by snapshots", () => {
+test("automatic off retains pills; manual consumes once and rejects insufficient materials", () => {
+  let s = freshState(0);
+  const a = s.holders[0].address;
+  s = setAutoCombine(s, a, false, 1);
+  s = applySnapshot(s, "r", 2);
+  assert.equal(s.holders[0].pills, 180);
+  assert.equal(s.holders[0].cores, 0);
+  const n = combineWallet(s, a, 0, 3);
+  assert.equal(n.holders[0].pills, 170);
+  assert.equal(n.holders[0].cores, 1);
+  assert.equal(n.holders[0].balance, s.holders[0].balance);
+  assert.throws(() => combineWallet(n, a, 1));
+  assert.throws(() => combineWallet(n, a, 4));
+  const on = setAutoCombine(n, a, true, 4);
+  assert.deepEqual(
+    TIERS.map((t) => on.holders[0][t.field]),
+    [0, 8, 1, 0, 0],
+  );
+  assert.ok(on.events.some((e) => e.tier === "souls" && e.amount === 1));
+});
+test("rankings use their declared metric and stable tie breaking, no mutation", () => {
   const s = freshState(),
-    n = applySnapshot(s, "a");
+    n = applySnapshot(s, "r");
   assert.deepEqual(
     sortedHolders(s.holders).map((h) => h.address),
     sortedHolders(n.holders).map((h) => h.address),
   );
-  const d = s.holders.map((h) => ({ address: h.address, balance: h.balance }));
-  d[19].balance = 19000000;
-  const edited = saveConfiguration(n, s.config, d);
-  assert.equal(sortedHolders(edited.holders)[0].address, d[19].address);
-  assert.equal(edited.holders[0].cores, n.holders[0].cores);
+  const holders = s.holders.map((h, i) => ({
+    ...h,
+    ascensions: i === 19 ? 1 : 0,
+  }));
+  assert.equal(
+    sortedHolders(holders, "weight")[0].address,
+    holders[19].address,
+  );
+  assert.equal(
+    sortedHolders(holders, "balance")[0].address,
+    holders[0].address,
+  );
+  assert.deepEqual(
+    holders.map((h) => h.address),
+    s.holders.map((h) => h.address),
+  );
 });
-test("invalid, duplicate and excessive balances rejected", () => {
-  assert.throws(() => validateHolders([{ address: "0x123", balance: 1 }], 1e9));
+test("legacy data migration preserves address balance pills cores and events", () => {
+  const s = freshState(1000);
+  s.version = 1;
+  s.config.intervalMinutes = 10;
+  delete s.config.unitTokens;
+  s.holders = s.holders.map((h) => ({
+    address: h.address,
+    balance: h.balance,
+    pills: 2,
+    cores: 13,
+    claimed: false,
+  }));
+  const n = parseState(JSON.stringify(s), 2000);
+  assert.equal(n.version, 2);
+  assert.equal(n.config.intervalMinutes, 5);
+  assert.equal(n.holders[0].cores, 13);
+  assert.equal(n.holders[0].pills, 2);
+  assert.equal(n.holders[0].souls, 0);
+  assert.equal(n.holders[0].balance, s.holders[0].balance);
+  assert.deepEqual(n.events, s.events);
+});
+test("invalid balances addresses supply and inventory are rejected", () => {
   const h = generateHolders();
   assert.throws(() => validateHolders([...h, h[0]], 1e9));
   h[0].balance = 1e9;
   assert.throws(() => validateHolders(h, 1e9));
-  h[0].balance = -1;
-  assert.throws(() => validateHolders(h, 1e9));
+  const s = freshState();
+  s.holders[0].souls = -1;
+  assert.throws(() => parseState(JSON.stringify(s)));
+  assert.throws(() => validateHolders([{ address: "0x123", balance: 1 }], 1e9));
 });
-test("CA reload, changed supply and period, system exclusions", () => {
-  const s = freshState(1000);
-  const cfg = {
-    ...s.config,
-    ca: "0x" + "a".repeat(40),
-    totalSupply: 2e9,
-    intervalMinutes: 5,
-  };
+test("configuration and exclusions, CA reload resets ledger", () => {
+  const s = freshState(1000),
+    cfg = {
+      ...s.config,
+      ca: "0x" + "a".repeat(40),
+      totalSupply: 2e9,
+      intervalMinutes: 10,
+    };
   const n = saveConfiguration(s, cfg, s.holders, 3000);
   assert.equal(n.round, 0);
-  assert.equal(n.nextAt, 303000);
-  assert.equal(n.holders.find((h) => h.balance === 2000000).balance, 2000000);
+  assert.equal(n.nextAt, 603000);
+  assert.equal(n.holders[0].balance, 36000000);
   const excluded = {
     ...s,
     config: { ...s.config, excludedAddresses: [s.holders[0].address] },
   };
-  assert.equal(applySnapshot(excluded, "r", 2000).holders[0].pills, 0);
+  assert.equal(weight(applySnapshot(excluded, "r", 2000).holders[0]), 0);
 });

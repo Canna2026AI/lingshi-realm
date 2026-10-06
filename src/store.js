@@ -41,12 +41,16 @@ export function useRealm(onNotice) {
       : commit();
   };
   useEffect(() => {
-    if (!localStorage.getItem(STORAGE_KEY)) {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      let version;
       try {
+        version = raw && JSON.parse(raw).version;
+      } catch {}
+      if (version !== 2)
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      } catch {
-        onNotice("本地存储不可用，刷新后状态可能丢失。");
-      }
+    } catch {
+      onNotice("本地存储不可用，刷新后状态可能丢失。");
     }
   }, []);
   useEffect(() => {

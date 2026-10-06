@@ -51,8 +51,8 @@ export default function WalletPicker({ state, onClose, onSelect }) {
             </span>
             <span className="wallet-option-end">
               <span>
-                {units(h.balance, state.config.totalSupply)
-                  ? `${units(h.balance, state.config.totalSupply)} 修炼单位`
+                {units(h.balance)
+                  ? `${units(h.balance)} 修炼单位`
                   : "未达门槛"}
               </span>
               <ArrowRight size={17} />

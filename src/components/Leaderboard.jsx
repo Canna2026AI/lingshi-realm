@@ -1,7 +1,7 @@
 import React from "react";
 import { useState, useRef, useEffect } from "react";
 import { Trophy, Search, Radio, Zap, ChevronDown } from "lucide-react";
-import { sortedHolders, shortAddress, number, percentage } from "../engine";
+import { sortedHolders, shortAddress, number, percentage, TIERS } from "../engine";
 import { CopyAddress, Pill } from "./UI";
 export function Leaderboard({ state, notice }) {
   const [query, setQuery] = useState("");
@@ -156,7 +156,7 @@ function Event({ event }) {
       <div>
         <div className="event-meta">
           <span>
-            {event.type === "core"
+            {(event.type === "core" || event.type === "upgrade")
               ? "境界突破"
               : event.type === "summary"
                 ? `第 ${event.round} 轮快照`
@@ -169,12 +169,12 @@ function Event({ event }) {
             <>
               本轮快照完成，<b>{event.participants}</b> 个地址获得筑基丹
             </>
-          ) : event.type === "core" ? (
+          ) : (event.type === "core" || event.type === "upgrade") ? (
             <>
               {shortAddress(event.address)}
               <br />
-              <b>十丹结金，突破成功</b>
-              {event.amount > 1 ? ` · ${event.amount} 个金丹` : ""}
+              <b>{event.type === "core" ? "十丹结金，突破成功" : `${TIERS.find(t => t.field === event.tier)?.name || "仙阶"}进阶，突破成功`}</b>
+              {event.amount > 1 ? ` · ${event.amount} 个${TIERS.find(t => t.field === event.tier)?.name || "金丹"}` : ""}
             </>
           ) : (
             <>

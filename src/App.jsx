@@ -124,8 +124,8 @@ export default function App() {
               {
                 icon: Flame,
                 label: "修炼门槛",
-                value: "0.1%",
-                suffix: "持仓起修",
+                value: "100,000",
+                suffix: "枚起修",
               },
               {
                 icon: Clock,
@@ -179,8 +179,8 @@ export default function App() {
               {[
                 {
                   title: "持有灵石",
-                  text: "持仓达 0.1%，开启修炼",
-                  detail: `每 ${number(state.config.totalSupply / 1000)} 枚灵石，计为一个修炼单位。`,
+                  text: "持有 10 万灵石，开启修炼",
+                  detail: `每 ${number(100000)} 枚灵石，计为一个修炼单位。`,
                 },
                 {
                   title: "定时凝丹",

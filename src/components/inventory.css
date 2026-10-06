@@ -1,0 +1,96 @@
+.ledger-inventory {
+  margin: 22px 0;
+  font-family: inherit;
+}
+.inventory-tiers {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+.inventory-tiers > div {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 5px;
+}
+.inventory-tiers img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+}
+.inventory-tiers span {
+  font-size: 12px;
+}
+.inventory-tiers b {
+  font-size: 20px;
+}
+.inventory-tiers small {
+  font-size: 10px;
+  opacity: 0.65;
+}
+.inventory-auto {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+  margin: 20px 0;
+}
+.inventory-auto input {
+  width: 16px;
+  height: 16px;
+  accent-color: #ab8346;
+}
+.inventory-auto small {
+  opacity: 0.65;
+  font-size: 10px;
+}
+.inventory-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.ledger-inventory .inventory-actions button {
+  padding: 10px 4px;
+  border: 1px solid #b59e7344;
+  background: #b59e7310;
+  color: inherit;
+  border-radius: 3px;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.inventory-actions small {
+  display: block;
+  font-size: 9px;
+  margin-top: 5px;
+  opacity: 0.65;
+}
+.inventory-actions button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.inventory-tiers img {
+  user-select: none;
+}
+@media (max-width: 720px) {
+  .inventory-tiers {
+    gap: 4px;
+  }
+  .inventory-tiers img {
+    width: 39px;
+    height: 39px;
+  }
+  .inventory-tiers span {
+    font-size: 10px;
+  }
+  .inventory-tiers b {
+    font-size: 17px;
+  }
+  .inventory-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .inventory-auto {
+    flex-wrap: wrap;
+  }
+}

@@ -137,10 +137,10 @@ export default function Admin({
           </div>
           <div className="threshold span-two">
             <span>
-              参与门槛 <b>0.1%</b>
+              参与门槛 <b>100,000 枚</b>
             </span>
             <span>
-              {number(config.totalSupply / 1000)} <small>LINGSHI / 单位</small>
+              {number(100000)} <small>LINGSHI / 单位</small>
             </span>
           </div>
         </div>
